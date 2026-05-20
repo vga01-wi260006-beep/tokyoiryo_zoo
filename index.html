@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マリンドリーム水族館 — 夢の海へ</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Kaisei+Tokumin:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #021b3a;
+    --ocean: #0a3d6b;
+    --mid: #1565c0;
+    --bright: #29b6f6;
+    --foam: #b3e5fc;
+    --pearl: #e1f5fe;
+    --white: #f0faff;
+    --gold: #ffd54f;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    background: var(--deep);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* BUBBLES */
+  .bubble-layer { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .bubble {
+    position:absolute; bottom:-60px; border-radius:50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.3), rgba(41,182,246,0.06));
+    border: 1px solid rgba(41,182,246,0.25);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform:translateY(0) translateX(0); opacity:0; }
+    10%  { opacity:1; }
+    90%  { opacity:0.5; }
+    100% { transform:translateY(-110vh) translateX(var(--drift)); opacity:0; }
+  }
+
+  /* NAV */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 40px;
+    background:linear-gradient(180deg, rgba(2,27,58,0.95), transparent);
+    backdrop-filter:blur(4px);
+  }
+  .nav-logo {
+    font-family:'Kaisei Tokumin', serif;
+    font-size:20px; font-weight:700; color:var(--foam);
+    display:flex; align-items:center; gap:10px;
+  }
+  .logo-dot {
+    width:9px; height:9px; border-radius:50%; background:var(--bright);
+    box-shadow:0 0 10px var(--bright);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5);opacity:.7} }
+  .nav-links { display:flex; gap:28px; }
+  .nav-links a { color:var(--foam); text-decoration:none; font-size:14px; opacity:.8; transition:opacity .2s; }
+  .nav-links a:hover { opacity:1; color:var(--bright); }
+
+  /* HERO */
+  #hero {
+    position:relative; min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    background:radial-gradient(ellipse at 50% 85%, #0c3d6e 0%, #021b3a 60%);
+  }
+  .wave-wrap { position:absolute; bottom:0; left:0; right:0; height:200px; overflow:hidden; }
+  .wave {
+    position:absolute; bottom:0; left:-100%; width:300%;
+    height:160px; border-radius:50% 50% 0 0; opacity:.12;
+    animation:waveMove 8s ease-in-out infinite;
+  }
+  .wave:nth-child(1) { background:var(--mid); animation-duration:7s; }
+  .wave:nth-child(2) { background:var(--bright); animation-duration:10s; animation-delay:-3s; opacity:.07; }
+  .wave:nth-child(3) { background:var(--foam); animation-duration:13s; animation-delay:-6s; opacity:.05; }
+  @keyframes waveMove { 0%,100%{transform:translateX(0) translateY(0)} 50%{transform:translateX(8%) translateY(-18px)} }
+
+  /* DOLPHIN HERO ANIMATION */
+  .dolphin-hero-wrap {
+    position:absolute; right:7%; bottom:18%;
+    width:400px; height:280px;
+  }
+  @keyframes heroFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-22px) rotate(2deg)} }
+  @keyframes heroSplash { 0%,100%{opacity:.3;transform:scaleY(1)} 50%{opacity:.7;transform:scaleY(1.4)} }
+  @keyframes heroBubble { 0%{opacity:0;transform:translateY(0) scale(.5)} 50%{opacity:.9} 100%{opacity:0;transform:translateY(-50px) scale(1.2)} }
+  .dolph-g { animation:heroFloat 3.8s ease-in-out infinite; transform-origin:200px 140px; filter:drop-shadow(0 0 28px rgba(41,182,246,0.35)); }
+  .sp-a { animation:heroSplash 1.9s ease-in-out infinite; transform-origin:95px 215px; }
+  .sp-b { animation:heroSplash 2.3s ease-in-out infinite .5s; transform-origin:65px 228px; }
+  .hb1 { animation:heroBubble 2.8s ease-in-out infinite .3s; }
+  .hb2 { animation:heroBubble 3.4s ease-in-out infinite 1.2s; }
+  .hb3 { animation:heroBubble 2.5s ease-in-out infinite 2s; }
+
+  /* Small floating dolphins */
+  .dolphin-sm { position:absolute; opacity:.45; }
+  @keyframes smFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+
+  .hero-content {
+    position:relative; z-index:2;
+    text-align:center; max-width:680px; padding:0 24px;
+    animation:fadeUp 1s ease-out .2s both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+  .hero-badge {
+    display:inline-block;
+    background:rgba(41,182,246,.13); border:1px solid rgba(41,182,246,.4);
+    border-radius:24px; padding:6px 20px;
+    font-size:13px; color:var(--bright); margin-bottom:24px; letter-spacing:2px;
+  }
+  h1 {
+    font-family:'Kaisei Tokumin', serif;
+    font-size:clamp(42px,7vw,80px); font-weight:700; line-height:1.15;
+    color:var(--white); margin-bottom:16px;
+    text-shadow:0 0 60px rgba(41,182,246,.25);
+  }
+  h1 span { color:var(--bright); }
+  .hero-sub { font-size:18px; color:var(--foam); opacity:.85; line-height:1.75; margin-bottom:40px; }
+  .btn-group { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .btn-primary {
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--bright); color:var(--deep);
+    font-family:'Zen Maru Gothic',sans-serif; font-size:16px; font-weight:700;
+    padding:14px 36px; border-radius:50px; border:none; cursor:pointer;
+    text-decoration:none; box-shadow:0 0 28px rgba(41,182,246,.4);
+    transition:transform .2s,box-shadow .2s;
+  }
+  .btn-primary:hover { transform:translateY(-3px); box-shadow:0 0 48px rgba(41,182,246,.6); }
+  .btn-outline {
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent; color:var(--foam);
+    font-family:'Zen Maru Gothic',sans-serif; font-size:16px; font-weight:500;
+    padding:14px 36px; border-radius:50px;
+    border:1.5px solid rgba(41,182,246,.5); cursor:pointer; text-decoration:none;
+    transition:border-color .2s,background .2s;
+  }
+  .btn-outline:hover { border-color:var(--bright); background:rgba(41,182,246,.08); }
+
+  /* SECTIONS */
+  section { position:relative; z-index:1; }
+  .section-label { display:inline-block; font-size:12px; letter-spacing:3px; color:var(--bright); margin-bottom:12px; }
+  .section-title {
+    font-family:'Kaisei Tokumin',serif;
+    font-size:clamp(28px,4vw,44px); font-weight:700; line-height:1.3; margin-bottom:16px;
+  }
+  .section-desc { font-size:16px; color:var(--foam); opacity:.8; line-height:1.8; max-width:520px; }
+
+  /* STATS */
+  #stats {
+    background:rgba(21,101,192,.12);
+    border-top:1px solid rgba(41,182,246,.12); border-bottom:1px solid rgba(41,182,246,.12);
+    padding:40px 0;
+  }
+  .stats-grid { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); text-align:center; }
+  .stat-item { padding:24px 16px; }
+  .stat-item+.stat-item { border-left:1px solid rgba(41,182,246,.12); }
+  .stat-num { font-family:'Kaisei Tokumin',serif; font-size:42px; font-weight:700; color:var(--bright); line-height:1; margin-bottom:6px; }
+  .stat-label { font-size:13px; color:var(--foam); opacity:.65; }
+
+  /* FEATURES */
+  #features { padding:100px 40px; }
+  .features-inner { max-width:1100px; margin:0 auto; }
+  .features-header { text-align:center; margin-bottom:64px; }
+  .features-header .section-desc { margin:0 auto; }
+  .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .feat-card {
+    background:rgba(255,255,255,.04); border:1px solid rgba(41,182,246,.14);
+    border-radius:20px; padding:36px 28px;
+    transition:transform .3s,border-color .3s,background .3s;
+    position:relative; overflow:hidden;
+  }
+  .feat-card::before {
+    content:''; position:absolute; top:-1px; left:20px; right:20px; height:2px;
+    background:linear-gradient(90deg,transparent,var(--bright),transparent);
+    opacity:0; transition:opacity .3s;
+  }
+  .feat-card:hover { transform:translateY(-6px); border-color:rgba(41,182,246,.38); background:rgba(41,182,246,.05); }
+  .feat-card:hover::before { opacity:1; }
+  .feat-icon { font-size:46px; margin-bottom:20px; display:block; }
+  .feat-title { font-size:20px; font-weight:700; color:var(--foam); margin-bottom:10px; }
+  .feat-text { font-size:14px; color:var(--foam); opacity:.62; line-height:1.75; }
+
+  /* SHOW */
+  #show {
+    padding:100px 40px;
+    background:radial-gradient(ellipse 90% 60% at 50% 50%, rgba(21,101,192,.22),transparent);
+  }
+  .show-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+  .show-visual { position:relative; display:flex; align-items:center; justify-content:center; }
+
+  /* Show dolphin animation */
+  @keyframes showFloat { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-20px) rotate(3deg)} }
+  @keyframes showRing { to{transform:rotate(360deg)} }
+  @keyframes showRingRev { to{transform:rotate(-360deg)} }
+  @keyframes dotPop { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.6)} }
+  @keyframes showBubble { 0%{opacity:0;transform:translateY(0)} 60%{opacity:.7} 100%{opacity:0;transform:translateY(-45px)} }
+
+  .show-ring-outer {
+    width:320px; height:320px; border-radius:50%;
+    border:1px solid rgba(41,182,246,.2);
+    position:relative; display:flex; align-items:center; justify-content:center;
+    animation:showRing 22s linear infinite;
+  }
+  .show-ring-outer::before {
+    content:''; position:absolute; inset:24px; border-radius:50%;
+    border:1px solid rgba(41,182,246,.1);
+  }
+  .show-dolphin-inner {
+    animation:showRingRev 22s linear infinite, showFloat 3.5s ease-in-out infinite;
+    width:180px;
+  }
+  .show-dot { position:absolute; width:7px; height:7px; border-radius:50%; background:var(--bright); box-shadow:0 0 8px var(--bright); animation:dotPop 2s ease-in-out infinite; }
+  .show-time-list { list-style:none; margin:28px 0; }
+  .show-time-list li { display:flex; align-items:center; gap:16px; padding:13px 0; border-bottom:1px solid rgba(41,182,246,.1); font-size:15px; }
+  .show-time-list li:last-child { border-bottom:none; }
+  .time-badge { background:rgba(41,182,246,.14); border:1px solid rgba(41,182,246,.3); color:var(--bright); font-weight:700; font-size:13px; padding:4px 12px; border-radius:20px; white-space:nowrap; }
+
+  /* ANIMALS */
+  #animals { padding:100px 40px; }
+  .animals-inner { max-width:1100px; margin:0 auto; }
+  .animals-header { text-align:center; margin-bottom:60px; }
+  .animals-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+  .animal-card {
+    background:rgba(255,255,255,.04); border:1px solid rgba(41,182,246,.1);
+    border-radius:16px; overflow:hidden;
+    transition:transform .3s,border-color .3s; cursor:pointer;
+  }
+  .animal-card:hover { transform:translateY(-8px) scale(1.02); border-color:rgba(41,182,246,.35); }
+  .animal-thumb {
+    height:130px; display:flex; align-items:center; justify-content:center; font-size:68px;
+    background:linear-gradient(180deg,rgba(21,101,192,.18),rgba(41,182,246,.06));
+  }
+  .animal-info { padding:12px 14px; }
+  .animal-name { font-size:15px; font-weight:700; color:var(--foam); margin-bottom:3px; }
+  .animal-jp { font-size:11px; color:var(--bright); letter-spacing:1px; }
+
+  /* TICKET */
+  #ticket { padding:100px 40px; }
+  .ticket-inner { max-width:800px; margin:0 auto; text-align:center; }
+  .ticket-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin:48px 0; }
+  .ticket-card {
+    background:rgba(255,255,255,.05); border:1px solid rgba(41,182,246,.18);
+    border-radius:20px; padding:32px 20px;
+    transition:transform .3s; position:relative;
+  }
+  .ticket-card:hover { transform:translateY(-6px); }
+  .ticket-card.featured { background:rgba(41,182,246,.1); border-color:var(--bright); box-shadow:0 0 36px rgba(41,182,246,.18); }
+  .featured-badge {
+    position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+    background:var(--bright); color:var(--deep);
+    font-size:11px; font-weight:700; padding:4px 16px; border-radius:20px; white-space:nowrap;
+  }
+  .ticket-type { font-size:12px; color:var(--bright); letter-spacing:2px; margin-bottom:12px; }
+  .ticket-price { font-family:'Kaisei Tokumin',serif; font-size:40px; font-weight:700; color:var(--white); line-height:1; margin-bottom:4px; }
+  .ticket-price sup { font-size:18px; vertical-align:super; }
+  .ticket-note { font-size:12px; color:var(--foam); opacity:.55; margin-bottom:20px; }
+  .ticket-perks { list-style:none; text-align:left; margin-bottom:24px; }
+  .ticket-perks li { font-size:13px; color:var(--foam); opacity:.75; padding:5px 0; display:flex; align-items:center; gap:8px; }
+  .tick { color:var(--bright); }
+
+  /* ACCESS */
+  #access { padding:100px 40px; }
+  .access-inner { max-width:1000px; margin:0 auto; }
+  .access-header { text-align:center; margin-bottom:60px; }
+  .access-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+  .access-card { background:rgba(255,255,255,.04); border:1px solid rgba(41,182,246,.14); border-radius:20px; padding:30px; }
+  .access-card-title { font-size:16px; font-weight:700; color:var(--foam); margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+  .access-row { display:flex; justify-content:space-between; align-items:flex-start; padding:9px 0; border-bottom:1px solid rgba(41,182,246,.07); font-size:14px; }
+  .access-row:last-child { border-bottom:none; }
+  .access-key { color:var(--foam); opacity:.55; flex-shrink:0; margin-right:12px; }
+  .access-val { color:var(--foam); text-align:right; }
+  .map-box {
+    background:rgba(21,101,192,.12); border:1px solid rgba(41,182,246,.18);
+    border-radius:20px; height:260px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; color:var(--foam); opacity:.65; font-size:36px; margin-top:24px;
+  }
+  .map-box p { font-size:14px; letter-spacing:1px; }
+
+  /* CTA */
+  #cta {
+    padding:120px 40px; text-align:center;
+    background:radial-gradient(ellipse 80% 60% at 50% 50%, rgba(21,101,192,.3),transparent);
+    border-top:1px solid rgba(41,182,246,.1);
+  }
+  .cta-title { font-family:'Kaisei Tokumin',serif; font-size:clamp(32px,5vw,56px); font-weight:700; margin-bottom:20px; }
+  .cta-title span { color:var(--bright); }
+  .cta-sub { font-size:17px; color:var(--foam); opacity:.72; margin-bottom:48px; line-height:1.7; }
+
+  /* FOOTER */
+  footer { background:rgba(2,27,58,.9); border-top:1px solid rgba(41,182,246,.1); padding:40px; text-align:center; }
+  .footer-logo { font-family:'Kaisei Tokumin',serif; font-size:22px; font-weight:700; color:var(--foam); margin-bottom:12px; }
+  .footer-links { display:flex; gap:24px; justify-content:center; margin:16px 0; }
+  .footer-links a { font-size:13px; color:var(--foam); opacity:.45; text-decoration:none; }
+  .footer-links a:hover { opacity:1; }
+  .footer-copy { font-size:12px; color:var(--foam); opacity:.28; margin-top:16px; }
+
+  /* REVEAL */
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity .7s ease,transform .7s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+
+  @media(max-width:768px){
+    nav { padding:16px 20px; }
+    .nav-links { display:none; }
+    .dolphin-hero-wrap { width:220px; right:2%; bottom:22%; }
+    .stats-grid,.features-grid,.ticket-cards,.access-grid { grid-template-columns:1fr; }
+    .show-inner { grid-template-columns:1fr; }
+    .show-visual { display:none; }
+    .animals-grid { grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bubble-layer" id="bubbles"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><div class="logo-dot"></div>マリンドリーム水族館</div>
+  <div class="nav-links">
+    <a href="#features">展示</a>
+    <a href="#show">ショー</a>
+    <a href="#animals">生き物</a>
+    <a href="#ticket">チケット</a>
+    <a href="#access">アクセス</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="wave-wrap">
+    <div class="wave"></div><div class="wave"></div><div class="wave"></div>
+  </div>
+
+  <!-- HERO DOLPHIN — beautifully drawn -->
+  <div class="dolphin-hero-wrap">
+    <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg" width="400">
+      <!-- shadow -->
+      <ellipse cx="200" cy="268" rx="130" ry="10" fill="#0a3060" opacity=".5"/>
+      <!-- splash left -->
+      <g class="sp-a">
+        <path d="M95,220 Q85,205 90,196 Q96,187 103,193 Q108,200 100,215Z" fill="#5bbfea" opacity=".5"/>
+        <path d="M78,228 Q68,213 73,204 Q79,195 86,201 Q90,208 82,222Z" fill="#5bbfea" opacity=".38"/>
+      </g>
+      <g class="sp-b">
+        <path d="M58,238 Q50,225 54,217 Q59,209 65,215 Q69,221 62,235Z" fill="#5bbfea" opacity=".32"/>
+      </g>
+      <!-- bubbles -->
+      <circle class="hb1" cx="52" cy="195" r="5" fill="none" stroke="#5bbfea" stroke-width="1.3"/>
+      <circle class="hb2" cx="38" cy="205" r="3.2" fill="none" stroke="#5bbfea" stroke-width="1"/>
+      <circle class="hb3" cx="62" cy="210" r="4" fill="none" stroke="#5bbfea" stroke-width="1.1"/>
+      <!-- DOLPHIN BODY -->
+      <g class="dolph-g">
+        <!-- tail flukes -->
+        <path d="M295,155 Q340,120 375,98 Q358,138 378,170 Q342,162 295,155Z" fill="#1a6fa8"/>
+        <path d="M295,155 Q330,148 360,148 Q375,155 370,165 Q355,170 330,168 Q308,165 295,155Z" fill="#a8d8f0" opacity=".5"/>
+        <!-- main body -->
+        <path d="M90,155 Q120,110 185,100 Q250,91 310,105 Q355,115 372,140 Q382,158 370,175 Q350,195 305,200 Q260,205 210,202 Q160,199 125,188 Q95,178 90,155Z" fill="#1976d2"/>
+        <!-- belly highlight -->
+        <path d="M110,162 Q140,145 195,138 Q250,132 305,145 Q340,155 350,170 Q335,185 300,192 Q255,198 205,195 Q158,192 128,180 Q105,170 110,162Z" fill="#b3e5fc" opacity=".55"/>
+        <!-- dorsal fin -->
+        <path d="M210,100 Q220,62 248,48 Q258,80 248,100Z" fill="#1565a0"/>
+        <path d="M210,100 Q222,80 240,75 Q248,85 240,98Z" fill="#1a6fa8" opacity=".6"/>
+        <!-- pectoral fin left -->
+        <path d="M150,182 Q128,215 155,208 Q170,200 162,185Z" fill="#1565a0"/>
+        <!-- snout -->
+        <path d="M90,155 Q65,158 42,162 Q28,166 42,170 Q58,174 82,168 Q94,163 96,158Z" fill="#1976d2"/>
+        <!-- snout lower curve -->
+        <path d="M42,170 Q60,178 85,172" fill="#1565a0" opacity=".5"/>
+        <!-- eye white -->
+        <circle cx="112" cy="142" r="14" fill="white"/>
+        <!-- eye iris -->
+        <circle cx="116" cy="140" r="9" fill="#0a2040"/>
+        <!-- eye shine big -->
+        <circle cx="120" cy="136" r="3.5" fill="white"/>
+        <!-- eye shine small -->
+        <circle cx="114" cy="145" r="1.5" fill="white" opacity=".6"/>
+        <!-- blowhole -->
+        <ellipse cx="230" cy="98" rx="8" ry="4" fill="#1565a0"/>
+        <!-- smile -->
+        <path d="M46,168 Q68,178 92,170" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <!-- rosy cheek -->
+        <ellipse cx="134" cy="155" rx="9" ry="5" fill="#ffb3c1" opacity=".45" transform="rotate(-10,134,155)"/>
+        <!-- body shine top -->
+        <ellipse cx="200" cy="116" rx="52" ry="14" fill="white" opacity=".11" transform="rotate(-12,200,116)"/>
+        <!-- body shine mid -->
+        <ellipse cx="300" cy="132" rx="28" ry="8" fill="white" opacity=".07" transform="rotate(-8,300,132)"/>
+        <!-- small wave drops near mouth -->
+        <circle cx="32" cy="160" r="3" fill="#5bbfea" opacity=".4"/>
+        <circle cx="22" cy="168" r="2" fill="#5bbfea" opacity=".28"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Small background dolphin left -->
+  <div style="position:absolute;left:3%;bottom:30%;width:140px;opacity:.35;animation:smFloat 5.5s ease-in-out infinite 1s;">
+    <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+      <path d="M295,155 Q340,120 375,98 Q358,138 378,170 Q342,162 295,155Z" fill="#29b6f6"/>
+      <path d="M90,155 Q120,110 185,100 Q250,91 310,105 Q355,115 372,140 Q382,158 370,175 Q350,195 305,200 Q260,205 210,202 Q160,199 125,188 Q95,178 90,155Z" fill="#1565c0"/>
+      <path d="M110,162 Q140,145 195,138 Q250,132 305,145 Q340,155 350,170 Q335,185 300,192 Q255,198 205,195 Q158,192 128,180 Q105,170 110,162Z" fill="#b3e5fc" opacity=".4"/>
+      <path d="M210,100 Q220,62 248,48 Q258,80 248,100Z" fill="#0d4f96"/>
+      <path d="M90,155 Q65,158 42,162 Q28,166 42,170 Q58,174 82,168 Q94,163 96,158Z" fill="#1565c0"/>
+      <circle cx="112" cy="142" r="12" fill="white"/>
+      <circle cx="115" cy="140" r="8" fill="#0a2040"/>
+      <circle cx="118" cy="137" r="3" fill="white"/>
+    </svg>
+  </div>
+
+  <!-- Small background dolphin top right, flipped -->
+  <div style="position:absolute;right:1%;top:28%;width:100px;opacity:.28;transform:scaleX(-1) rotate(20deg);animation:smFloat 6.5s ease-in-out infinite .5s;">
+    <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+      <path d="M295,155 Q340,120 375,98 Q358,138 378,170 Q342,162 295,155Z" fill="#29b6f6"/>
+      <path d="M90,155 Q120,110 185,100 Q250,91 310,105 Q355,115 372,140 Q382,158 370,175 Q350,195 305,200 Q260,205 210,202 Q160,199 125,188 Q95,178 90,155Z" fill="#29b6f6"/>
+      <path d="M110,162 Q140,145 195,138 Q250,132 305,145 Q340,155 350,170 Q335,185 300,192 Q255,198 205,195 Q158,192 128,180 Q105,170 110,162Z" fill="#b3e5fc" opacity=".4"/>
+      <path d="M210,100 Q220,62 248,48 Q258,80 248,100Z" fill="#1976d2"/>
+      <path d="M90,155 Q65,158 42,162 Q28,166 42,170 Q58,174 82,168 Q94,163 96,158Z" fill="#29b6f6"/>
+      <circle cx="112" cy="142" r="12" fill="white"/>
+      <circle cx="115" cy="140" r="8" fill="#0a2040"/>
+      <circle cx="118" cy="137" r="3" fill="white"/>
+    </svg>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">🌊 OPEN 365 DAYS</div>
+    <h1>夢の海へ、<span>ようこそ</span></h1>
+    <p class="hero-sub">500種以上の海の生き物たちが暮らす<br>マリンドリーム水族館へ。<br>感動のイルカショーで特別な思い出を。</p>
+    <div class="btn-group">
+      <a href="#ticket" class="btn-primary">🎫 チケットを購入</a>
+      <a href="#show" class="btn-outline">▶ ショーを見る</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div id="stats">
+  <div class="stats-grid">
+    <div class="stat-item reveal"><div class="stat-num">500<span style="font-size:20px">+</span></div><div class="stat-label">展示生き物の種類</div></div>
+    <div class="stat-item reveal"><div class="stat-num">8<span style="font-size:20px">万</span></div><div class="stat-label">総展示水量（リットル）</div></div>
+    <div class="stat-item reveal"><div class="stat-num">3</div><div class="stat-label">毎日のイルカショー回数</div></div>
+    <div class="stat-item reveal"><div class="stat-num">★4.9</div><div class="stat-label">口コミ評価</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="features-inner">
+    <div class="features-header reveal">
+      <div class="section-label">HIGHLIGHTS</div>
+      <div class="section-title">海の世界を体験しよう</div>
+      <p class="section-desc">子どもから大人まで楽しめる、たくさんの体験があなたを待っています。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card reveal"><span class="feat-icon">🐬</span><div class="feat-title">イルカショー</div><p class="feat-text">トレーナーとイルカの息のあったパフォーマンス。毎日3回開催、感動の瞬間をお届けします。</p></div>
+      <div class="feat-card reveal"><span class="feat-icon">🦈</span><div class="feat-title">サメのトンネル</div><p class="feat-text">長さ25メートルの水中トンネルを歩きながら、頭上を泳ぐサメを360°体験。</p></div>
+      <div class="feat-card reveal"><span class="feat-icon">🪸</span><div class="feat-title">珊瑚礁の海</div><p class="feat-text">カラフルな熱帯魚と珊瑚礁の美しい世界。水族館一番のフォトスポットです。</p></div>
+      <div class="feat-card reveal"><span class="feat-icon">🖐️</span><div class="feat-title">タッチプール</div><p class="feat-text">ヒトデやウニなど磯の生き物に実際に触れることができる体験コーナー。</p></div>
+      <div class="feat-card reveal"><span class="feat-icon">🌙</span><div class="feat-title">ナイトアクアリウム</div><p class="feat-text">金・土・日の夜間特別開館。幻想的な光の演出で昼とは違う水族館の顔が見られます。</p></div>
+      <div class="feat-card reveal"><span class="feat-icon">🎓</span><div class="feat-title">バックヤードツアー</div><p class="feat-text">水族館の裏側を特別公開。飼育員の仕事や魚の健康管理について学べます。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DOLPHIN SHOW -->
+<section id="show">
+  <div class="show-inner">
+    <div class="show-visual reveal">
+      <!-- Glow rings bg -->
+      <div style="position:absolute;width:420px;height:420px;border-radius:50%;border:1px solid rgba(41,182,246,.07);"></div>
+      <div style="position:absolute;width:480px;height:480px;border-radius:50%;border:1px solid rgba(41,182,246,.04);"></div>
+      <!-- Spinning ring -->
+      <div class="show-ring-outer">
+        <div class="show-dot" style="top:6px;left:50%;transform:translateX(-50%);animation-delay:0s;"></div>
+        <div class="show-dot" style="top:50%;right:6px;transform:translateY(-50%);animation-delay:.7s;"></div>
+        <div class="show-dot" style="bottom:6px;left:50%;transform:translateX(-50%);animation-delay:1.4s;"></div>
+        <div class="show-dot" style="top:50%;left:6px;transform:translateY(-50%);animation-delay:2.1s;"></div>
+        <div class="show-dolphin-inner">
+          <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg" width="180">
+            <path d="M295,155 Q340,120 375,98 Q358,138 378,170 Q342,162 295,155Z" fill="#1a6fa8"/>
+            <path d="M90,155 Q120,110 185,100 Q250,91 310,105 Q355,115 372,140 Q382,158 370,175 Q350,195 305,200 Q260,205 210,202 Q160,199 125,188 Q95,178 90,155Z" fill="#1976d2"/>
+            <path d="M110,162 Q140,145 195,138 Q250,132 305,145 Q340,155 350,170 Q335,185 300,192 Q255,198 205,195 Q158,192 128,180 Q105,170 110,162Z" fill="#b3e5fc" opacity=".5"/>
+            <path d="M210,100 Q220,62 248,48 Q258,80 248,100Z" fill="#1565a0"/>
+            <path d="M90,155 Q65,158 42,162 Q28,166 42,170 Q58,174 82,168 Q94,163 96,158Z" fill="#1976d2"/>
+            <circle cx="112" cy="142" r="13" fill="white"/>
+            <circle cx="115" cy="140" r="8.5" fill="#0a2040"/>
+            <circle cx="119" cy="137" r="3" fill="white"/>
+            <path d="M46,168 Q68,178 92,170" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <ellipse cx="200" cy="116" rx="48" ry="12" fill="white" opacity=".1" transform="rotate(-12,200,116)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="show-content reveal">
+      <div class="section-label">DOLPHIN SHOW</div>
+      <div class="section-title">毎日3回開催！<br>感動のイルカショー</div>
+      <p class="section-desc">ベテラントレーナーたちとイルカが繰り広げる圧巻のパフォーマンス。ジャンプや水しぶきで子どもも大人も大喜び！最前列の「ぬれゾーン」は迫力満点です。</p>
+      <ul class="show-time-list">
+        <li><span class="time-badge">11:00</span> ファミリーショー（約20分）</li>
+        <li><span class="time-badge">14:00</span> スペシャルショー（約30分）</li>
+        <li><span class="time-badge">16:30</span> サンセットショー（約20分）</li>
+      </ul>
+      <a href="#ticket" class="btn-primary" style="display:inline-flex;">🎫 チケットを購入</a>
+    </div>
+  </div>
+</section>
+
+<!-- ANIMALS -->
+<section id="animals">
+  <div class="animals-inner">
+    <div class="animals-header reveal">
+      <div class="section-label">OUR ANIMALS</div>
+      <div class="section-title">出会える海の仲間たち</div>
+      <p class="section-desc" style="margin:0 auto;">500種以上の生き物が皆さんをお待ちしています。</p>
+    </div>
+    <div class="animals-grid">
+      <div class="animal-card reveal"><div class="animal-thumb">🐬</div><div class="animal-info"><div class="animal-name">バンドウイルカ</div><div class="animal-jp">BOTTLENOSE DOLPHIN</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🦈</div><div class="animal-info"><div class="animal-name">シュモクザメ</div><div class="animal-jp">HAMMERHEAD SHARK</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🐙</div><div class="animal-info"><div class="animal-name">マダコ</div><div class="animal-jp">COMMON OCTOPUS</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🐠</div><div class="animal-info"><div class="animal-name">カクレクマノミ</div><div class="animal-jp">CLOWNFISH</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🐡</div><div class="animal-info"><div class="animal-name">フグ</div><div class="animal-jp">PUFFERFISH</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🦑</div><div class="animal-info"><div class="animal-name">ダイオウイカ</div><div class="animal-jp">GIANT SQUID</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🐢</div><div class="animal-info"><div class="animal-name">アオウミガメ</div><div class="animal-jp">GREEN SEA TURTLE</div></div></div>
+      <div class="animal-card reveal"><div class="animal-thumb">🐧</div><div class="animal-info"><div class="animal-name">フンボルトペンギン</div><div class="animal-jp">HUMBOLDT PENGUIN</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKET -->
+<section id="ticket">
+  <div class="ticket-inner">
+    <div class="reveal">
+      <div class="section-label" style="display:block;text-align:center;">TICKET</div>
+      <div class="section-title" style="text-align:center;">入場チケット</div>
+      <p class="section-desc" style="margin:0 auto;text-align:center;">当日券・オンライン前売り券の両方をご用意しています。</p>
+    </div>
+    <div class="ticket-cards reveal">
+      <div class="ticket-card">
+        <div class="ticket-type">CHILD</div>
+        <div class="ticket-price"><sup>¥</sup>1,200</div>
+        <div class="ticket-note">3歳〜12歳</div>
+        <ul class="ticket-perks">
+          <li><span class="tick">✦</span> 全展示エリア入場</li>
+          <li><span class="tick">✦</span> イルカショー観覧</li>
+          <li><span class="tick">✦</span> タッチプール体験</li>
+        </ul>
+        <a href="#" class="btn-outline" style="display:block;text-align:center;">購入する</a>
+      </div>
+      <div class="ticket-card featured">
+        <div class="featured-badge">⭐ 人気No.1</div>
+        <div class="ticket-type">ADULT</div>
+        <div class="ticket-price"><sup>¥</sup>2,400</div>
+        <div class="ticket-note">13歳以上</div>
+        <ul class="ticket-perks">
+          <li><span class="tick">✦</span> 全展示エリア入場</li>
+          <li><span class="tick">✦</span> イルカショー観覧</li>
+          <li><span class="tick">✦</span> タッチプール体験</li>
+          <li><span class="tick">✦</span> 音声ガイド無料</li>
+        </ul>
+        <a href="#" class="btn-primary" style="display:block;text-align:center;">購入する</a>
+      </div>
+      <div class="ticket-card">
+        <div class="ticket-type">FAMILY</div>
+        <div class="ticket-price"><sup>¥</sup>6,800</div>
+        <div class="ticket-note">大人2名＋子ども2名</div>
+        <ul class="ticket-perks">
+          <li><span class="tick">✦</span> 全展示エリア入場</li>
+          <li><span class="tick">✦</span> イルカショー優先席</li>
+          <li><span class="tick">✦</span> お土産クーポン付き</li>
+          <li><span class="tick">✦</span> 記念写真サービス</li>
+        </ul>
+        <a href="#" class="btn-outline" style="display:block;text-align:center;">購入する</a>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--foam);opacity:.45;text-align:center;">※ 障がい者手帳をお持ちの方は窓口にてご提示ください。</p>
+  </div>
+</section>
+
+<!-- ACCESS -->
+<section id="access">
+  <div class="access-inner">
+    <div class="access-header reveal">
+      <div class="section-label">ACCESS</div>
+      <div class="section-title">アクセス・開館情報</div>
+    </div>
+    <div class="access-grid">
+      <div class="access-card reveal">
+        <div class="access-card-title"><span>🕐</span> 開館情報</div>
+        <div class="access-row"><span class="access-key">開館時間</span><span class="access-val">9:00〜18:00（最終入場17:30）</span></div>
+        <div class="access-row"><span class="access-key">ナイト営業</span><span class="access-val">金・土・日 〜 21:00</span></div>
+        <div class="access-row"><span class="access-key">休館日</span><span class="access-val">年中無休</span></div>
+        <div class="access-row"><span class="access-key">電話番号</span><span class="access-val">03-0000-0000</span></div>
+      </div>
+      <div class="access-card reveal">
+        <div class="access-card-title"><span>🚃</span> アクセス</div>
+        <div class="access-row"><span class="access-key">住所</span><span class="access-val">〒000-0000 東京都港区海の丘1-1</span></div>
+        <div class="access-row"><span class="access-key">電車</span><span class="access-val">海の駅より徒歩3分</span></div>
+        <div class="access-row"><span class="access-key">バス</span><span class="access-val">水族館前バス停下車</span></div>
+        <div class="access-row"><span class="access-key">駐車場</span><span class="access-val">300台収容（有料）</span></div>
+      </div>
+    </div>
+    <div class="map-box reveal"><div>📍</div><p>Google マップ</p></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-title reveal">さあ、<span>海の冒険</span>へ出発しよう！</div>
+  <p class="cta-sub reveal">家族みんなで、大切な人と、一生の思い出を<br>マリンドリーム水族館で作りませんか。</p>
+  <div class="btn-group reveal">
+    <a href="#ticket" class="btn-primary">🎫 今すぐチケットを購入</a>
+    <a href="#" class="btn-outline">📅 団体予約はこちら</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">🐬 マリンドリーム水族館</div>
+  <div class="footer-links">
+    <a href="#">プライバシーポリシー</a>
+    <a href="#">利用規約</a>
+    <a href="#">お問い合わせ</a>
+    <a href="#">採用情報</a>
+    <a href="#">プレス</a>
+  </div>
+  <div class="footer-copy">© 2024 Marine Dream Aquarium. All rights reserved.</div>
+</footer>
+
+<script>
+(function(){
+  const wrap = document.getElementById('bubbles');
+  for(let i=0;i<28;i++){
+    const b = document.createElement('div');
+    b.className='bubble';
+    const size=6+Math.random()*22;
+    b.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-delay:${Math.random()*16}s;animation-duration:${11+Math.random()*18}s;--drift:${(Math.random()-.5)*80}px;`;
+    wrap.appendChild(b);
+  }
+})();
+
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{ if(e.isIntersecting) setTimeout(()=>e.target.classList.add('visible'),i*70); });
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+document.querySelectorAll('.features-grid,.animals-grid,.ticket-cards,.stats-grid').forEach(g=>{
+  g.querySelectorAll('.reveal').forEach((el,i)=>{ el.style.transitionDelay=`${i*.08}s`; });
+});
+</script>
+</body>
+</html>
